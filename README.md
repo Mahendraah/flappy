@@ -1,2 +1,13 @@
-# flappy
-HTML code 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flappy Bird Game</title>
+    <link rel="stylesheet" href="flappy bird.css">
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <script src="flappy bird.js"></script>
+</body>
+</html>
