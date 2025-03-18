@@ -1,0 +1,116 @@
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+canvas.width = 400;
+canvas.height = 500;
+
+let bird = {
+    x: 50,
+    y: canvas.height / 2,
+    radius: 15,
+    velocity: 0,
+    gravity: 0.5,
+    jump: -8
+};
+
+let pipes = [];
+let pipeWidth = 50;
+let pipeGap = 100;
+let frame = 0;
+let score = 0;
+let gameOver = false;
+
+// Handle bird jump
+document.addEventListener("keydown", function (event) {
+    if (event.code === "Space" && !gameOver) {
+        bird.velocity = bird.jump;
+    }
+});
+
+// Game loop
+function update() {
+    if (gameOver) return;
+
+    // Bird physics
+    bird.velocity += bird.gravity;
+    bird.y += bird.velocity;
+
+    // Add pipes
+    if (frame % 90 === 0) {
+        let pipeHeight = Math.random() * (canvas.height - pipeGap - 50) + 20;
+        pipes.push({
+            x: canvas.width,
+            top: pipeHeight,
+            bottom: pipeHeight + pipeGap
+        });
+    }
+    
+    frame++;
+
+    // Move pipes
+    for (let i = 0; i < pipes.length; i++) {
+        pipes[i].x -= 3;
+
+        // Check for collision
+        if (
+            bird.x + bird.radius > pipes[i].x &&
+            bird.x - bird.radius < pipes[i].x + pipeWidth &&
+            (bird.y - bird.radius < pipes[i].top || bird.y + bird.radius > pipes[i].bottom)
+        ) {
+            gameOver = true;
+        }
+
+        // Increase score
+        if (pipes[i].x + pipeWidth === bird.x) {
+            score++;
+        }
+    }
+
+    // Remove off-screen pipes
+    pipes = pipes.filter(pipe => pipe.x + pipeWidth > 0);
+
+    // Check if bird hits the ground or ceiling
+    if (bird.y + bird.radius > canvas.height || bird.y - bird.radius < 0) {
+        gameOver = true;
+    }
+}
+
+// Draw everything
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw bird
+    ctx.fillStyle = "yellow";
+    ctx.beginPath();
+    ctx.arc(bird.x, bird.y, bird.radius, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Draw pipes
+    ctx.fillStyle = "green";
+    for (let pipe of pipes) {
+        ctx.fillRect(pipe.x, 0, pipeWidth, pipe.top);
+        ctx.fillRect(pipe.x, pipe.bottom, pipeWidth, canvas.height - pipe.bottom);
+    }
+
+    // Draw score
+    ctx.fillStyle = "black";
+    ctx.font = "20px Arial";
+    ctx.fillText(`Score: ${score}`, 10, 30);
+
+    if (gameOver) {
+        ctx.fillStyle = "red";
+        ctx.font = "30px Arial";
+        ctx.fillText("Game Over", canvas.width / 2 - 70, canvas.height / 2);
+    }
+}
+
+// Game loop
+function loop() {
+    update();
+    draw();
+    requestAnimationFrame(loop);
+}
+
+// Start the game
+loop();
+
